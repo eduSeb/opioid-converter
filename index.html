@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RotOpia - Calculateur & Référence Opiacés</title>
+    <meta name="description" content="Application de rotation et conversion d'opiacés multi-sources">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+    </div>
+
+    <main class="app-container">
+        <header class="app-header">
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+                </svg>
+                <h1>RotOpia</h1>
+            </div>
+            <p class="subtitle">Calculateur de Rotation Opiacée Multi-Molécules</p>
+        </header>
+
+        <section class="glass-panel calculator-section">
+            <h2>Calculateur de Rotation</h2>
+            
+            <div class="calc-grid">
+                <!-- Source -->
+                <div class="calc-card source-card">
+                    <div class="card-header">
+                        <h3>Opioïdes Actuels (Source)</h3>
+                        <button id="add-source-btn" class="btn-small">
+                            <span>+ Ajouter</span>
+                        </button>
+                    </div>
+                    
+                    <div id="sources-container">
+                        <!-- Les opiacés seront injectés ici par JS -->
+                    </div>
+
+                    <!-- Section Entredoses Reçues -->
+                    <div class="prn-usage-box">
+                        <h4>Consommation d'Entredoses (PRN) / 24h</h4>
+                        <div class="prn-inputs">
+                            <div class="form-group">
+                                <label>Dose par prise</label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="prn-dose-val" placeholder="Ex: 10" min="0" step="1">
+                                    <span class="unit">mg</span>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>Nb de prises</label>
+                                <div class="input-wrapper">
+                                    <input type="number" id="prn-count" placeholder="0" min="0" step="1">
+                                    <span class="unit">/24h</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="total-mme-display">
+                        Total Équivalent Morphine PO : <span id="total-mme">0</span> mg/24h
+                    </div>
+                </div>
+
+                <!-- Separation -->
+                <div class="conversion-arrow">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </div>
+
+                <!-- Target -->
+                <div class="calc-card target-card">
+                    <h3>Molécule Cible</h3>
+                    <div class="form-group">
+                        <label for="target-drug">Médicament & Voie</label>
+                        <select id="target-drug">
+                            <option value="morphine_po" data-unit="mg/24h">Morphine PO (MS Direct, MS Contin...)</option>
+                            <option value="morphine_sc" data-unit="mg/24h">Morphine S/C (Stellorphine...)</option>
+                            <option value="morphine_iv" data-unit="mg/24h">Morphine IV (Stellorphine...)</option>
+                            <option value="oxycodone_po" data-unit="mg/24h">Oxycodone PO (OxyContin, OxyNorm...)</option>
+                            <option value="hydromorphone_po" data-unit="mg/24h">Hydromorphone PO (Palladone)</option>
+                            <option value="codeine_po" data-unit="mg/24h">Codéine PO</option>
+                            <option value="tramadol_po" data-unit="mg/24h">Tramadol PO</option>
+                            <option value="tramadol_iv" data-unit="mg/24h">Tramadol IV/SC</option>
+                            <option value="dihydrocodeine_po" data-unit="mg/24h">Dihydrocodéine PO (Codicontin)</option>
+                            <option value="fentanyl_patch" data-unit="µg/h">Fentanyl Patch (Durogesic, Matrifen)</option>
+                            <option value="buprenorphine_patch" data-unit="µg/h">Buprénorphine Patch (Transtec)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="result-display">
+                        <div class="result-label">Dose Équivalente Tolérée</div>
+                        <div class="result-value">
+                            <span id="target-dose">0</span>
+                            <span class="unit" id="target-unit">mg/24h</span>
+                        </div>
+                        <div class="reduction-warning">
+                            <strong>Sécurité (Tolérance croisée) :</strong> Ratios asymétriques ! Nos ratios (basés SFAP/AFSOS) intègrent <strong>déjà</strong> une réduction préventive de sécurité lors des changements de molécule. Le résultat affiché est la posologie de départ fortement sécurisée. Une nouvelle titration clinique est toujours requise.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="breakthrough-dose glass-panel-inner">
+                <div class="btd-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <div class="btd-content">
+                    <h4>Entre-Doses (Breakthrough Pain) - Cible</h4>
+                    <p id="btd-display"><span id="btd-calc">0 mg PO Morphine</span></p>
+                    <small>Règle : 10-15% dose 24h (Paliers spécifiques pour SC). Délai min : <strong>30 min (SC)</strong>.<br><span style="color:var(--warning-text); display:inline-block; margin-top:5px;">⚠️ Ne pas utiliser de Fentanyl transmuqueux en entredose pendant la phase de titration du traitement de fond !</span></small>
+                </div>
+            </div>
+
+            <div class="justification-box" id="justification-container" style="display: none; margin-top: 1.5rem; background: rgba(15, 23, 42, 0.4); border-radius: 12px; padding: 1.5rem; border: 1px solid rgba(255,255,255,0.05);">
+                <h4 style="color: var(--accent); margin-bottom: 0.75rem;">Détail et Justification du Calcul</h4>
+                <ul id="justification-list" style="color: var(--text-secondary); font-size: 0.9rem; margin-left: 1.2rem; line-height: 1.6;"></ul>
+            </div>
+
+            <div class="print-actions">
+                <button id="print-btn" class="btn-print">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                        <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                        <rect x="6" y="14" width="12" height="8"></rect>
+                    </svg>
+                    Imprimer le Dossier
+                </button>
+            </div>
+        </section>
+
+        <section class="glass-panel reference-section">
+            <h2>Tableau de Référence de l'Arsenal</h2>
+            <div class="table-responsive">
+                <table id="reference-table">
+                    <thead>
+                        <tr>
+                            <th>Molécule & Nom</th>
+                            <th>Forme</th>
+                            <th>Dosages Disponibles</th>
+                            <th>Délais d'action</th>
+                            <th>Durée d'action</th>
+                            <th>Remarques</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Injecté par JS -->
+                    </tbody>
+                </table>
+            </div>
+            <p class="disclaimer">
+                <strong>Attention:</strong> Outil d'aide à la décision. Les résultats sont théoriques. Base calculatoire M+ S/C=PO/2, IV=PO/3.
+            </p>
+        </section>
+    </main>
+
+    <!-- Template for Source Row (Used by JS) -->
+    <template id="source-row-template">
+        <div class="source-row">
+            <div class="form-group">
+                <label>Médicament</label>
+                <select class="source-drug-select">
+                    <option value="morphine_po" data-unit="mg/24h">Morphine PO (MS Direct, MS Contin...)</option>
+                    <option value="morphine_sc" data-unit="mg/24h">Morphine S/C (Stellorphine...)</option>
+                    <option value="morphine_iv" data-unit="mg/24h">Morphine IV (Stellorphine...)</option>
+                    <option value="oxycodone_po" data-unit="mg/24h">Oxycodone PO (OxyContin, OxyNorm...)</option>
+                    <option value="hydromorphone_po" data-unit="mg/24h">Hydromorphone PO (Palladone)</option>
+                    <option value="codeine_po" data-unit="mg/24h">Codéine PO</option>
+                    <option value="tramadol_po" data-unit="mg/24h">Tramadol PO</option>
+                    <option value="tramadol_iv" data-unit="mg/24h">Tramadol IV/SC</option>
+                    <option value="dihydrocodeine_po" data-unit="mg/24h">Dihydrocodéine PO (Codicontin)</option>
+                    <option value="fentanyl_patch" data-unit="µg/h">Fentanyl Patch (Durogesic, Matrifen)</option>
+                    <option value="buprenorphine_patch" data-unit="µg/h">Buprénorphine Patch (Transtec)</option>
+                    <option value="buprenorphine_sl" data-unit="mg/24h">Bupré. Sublingual (Temgesic)</option>
+                </select>
+            </div>
+            <div class="form-group dose-group">
+                <label>Posologie (/24h)</label>
+                <div class="input-wrapper">
+                    <input type="number" class="source-dose-input" placeholder="Ex: 60" min="0" step="0.1">
+                    <span class="unit source-unit-display">mg</span>
+                </div>
+            </div>
+            <button class="btn-remove" title="Supprimer cet opiacé">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                </svg>
+            </button>
+        </div>
+    </template>
+
+    <script src="app.js"></script>
+</body>
+</html>
